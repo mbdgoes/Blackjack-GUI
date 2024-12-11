@@ -12,7 +12,6 @@ class Card:
     def get_image_filename(self):
         return f"{self.rank} of {self.suit}.png"
 
-
 class Deck:
     def __init__(self):
         self.cards = []
@@ -33,17 +32,24 @@ class Deck:
     def draw_card(self):
         return self.cards.pop() if self.cards else None
 
+
 class BlackjackGame:
     def __init__(self):
         self.deck = Deck()
         self.player_hand = []
         self.dealer_hand = []
+        self.player_chips = 5000
+        self.current_bet = 0
         self.game_over = False
 
     def start_game(self):
         self.player_hand = [self.deck.draw_card(), self.deck.draw_card()]
         self.dealer_hand = [self.deck.draw_card(), self.deck.draw_card()]
         self.game_over = False
+
+        if self.calculate_hand_value(self.dealer_hand) == 21:
+            self.game_over = True
+            return "Dealer has Blackjack! You lose."
 
     def calculate_hand_value(self, hand):
         value = sum(card.value for card in hand)
@@ -74,3 +80,23 @@ class BlackjackGame:
         if player_value < dealer_value:
             return "Dealer wins!"
         return "It's a tie!"
+    
+    def reset_chips(self):
+        self.player_chips = 5000
+
+
+    def place_bet(self, amount):
+        if amount <= 0 or amount > self.player_chips:
+            return "Invalid bet amount."
+        self.current_bet = amount
+        self.player_chips -= amount
+        return f"Bet placed: {amount}"
+
+    def settle_bet(self, message):
+        if "Player wins" in message:
+            self.player_chips += self.current_bet * 2
+        elif "It's a tie" in message:
+            self.player_chips += self.current_bet
+
+    def get_player_chips(self):
+        return self.player_chips
