@@ -1,8 +1,9 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from game import BlackjackGame
+from game import BlackjackGame, Card, Deck
 
+# verificar a funcionalidade de apostas, incluindo valores válidos e inválidos
 def test_place_bet():
     game = BlackjackGame()
     initial_chips = game.get_player_chips()
@@ -16,3 +17,108 @@ def test_place_bet():
 
     result_invalid = game.place_bet(initial_chips + 1000)
     assert result_invalid == "Invalid bet amount."
+
+# Representação textual de uma carta
+def test_card_representation():
+    card = Card("Hearts", "Ace", 11)
+    assert repr(card) == "Ace of Hearts"
+
+# Inicialização do baralho
+def test_deck_initialization():
+    deck = Deck()
+    assert len(deck.cards) == 52
+
+# Checar embaralhamento
+def test_deck_shuffle():
+    deck1 = Deck()
+    deck2 = Deck()
+    assert deck1.cards != deck2.cards
+
+# Verificar se uma carta é removida do baralho ao ser comprada
+def test_draw_card():
+    deck = Deck()
+    card = deck.draw_card()
+    assert card is not None
+    assert len(deck.cards) == 51
+
+# Calcular o valor da mão com Áses -> verifica se vale 11 ou 1
+def test_calculate_hand_value_with_aces():
+    game = BlackjackGame()
+    hand = [Card("Hearts", "Ace", 11), Card("Spades", "Ace", 11)]
+    assert game.calculate_hand_value(hand) == 12
+
+# Valor de uma mão sem Áses
+def test_calculate_hand_value_no_aces():
+    game = BlackjackGame()
+    hand = [Card("Hearts", "Ten", 10), Card("Diamonds", "Nine", 9)]
+    assert game.calculate_hand_value(hand) == 19
+
+# Valor de uma mão com múltiplos Áses
+def test_calculate_hand_value_multiple_aces():
+    game = BlackjackGame()
+    hand = [Card("Hearts", "Ace", 11), Card("Spades", "Ace", 11), Card("Clubs", "Nine", 9)]
+    assert game.calculate_hand_value(hand) == 21
+
+# Checar apostas com valores inválidos
+def test_place_bet_invalid_amount():
+    game = BlackjackGame()
+    result = game.place_bet(-100)
+    assert result == "Invalid bet amount."
+
+# Verificar a inicialização do jogo
+def test_blackjack_game_initialization():
+    game = BlackjackGame()
+    assert len(game.deck.cards) == 52
+    assert game.player_chips == 5000
+    assert game.current_bet == 0
+    assert not game.game_over
+
+# Verificar as mãos iniciais dos jogadores
+def test_start_game_initial_hands():
+    game = BlackjackGame()
+    game.start_game()
+    assert len(game.player_hand) == 2
+    assert len(game.dealer_hand) == 2
+
+# Blackjack imediato para o dealer
+def test_start_game_blackjack():
+    game = BlackjackGame()
+    game.deck.cards = [
+        Card("Hearts", "Ace", 11),
+        Card("Spades", "Jack", 10),
+        Card("Diamonds", "Nine", 9),
+        Card("Clubs", "Eight", 8),
+    ]
+    result = game.start_game()
+    assert result == "Dealer has Blackjack! You lose."
+    assert game.game_over
+
+# Verificar se uma carta é adicionada corretamente ao dar "Hit"
+def test_hit_adds_card():
+    game = BlackjackGame()
+    game.start_game()
+    initial_hand_size = len(game.player_hand)
+    game.hit(game.player_hand)
+    assert len(game.player_hand) == initial_hand_size + 1
+
+# Verificar o comportamento do jogo quando o jogador ultrapassa 21 pontos
+def test_check_winner_player_busts():
+    game = BlackjackGame()
+    game.player_hand = [Card("Hearts", "Ten", 10), Card("Diamonds", "Nine", 9), Card("Clubs", "Five", 5)]
+    result = game.check_winner()
+    assert result == "Dealer wins! Player busted."
+
+# Verificar o comportamento do jogo quando o dealer ultrapassa 21 pontos
+def test_check_winner_dealer_busts():
+    game = BlackjackGame()
+    game.dealer_hand = [Card("Hearts", "Ten", 10), Card("Diamonds", "Nine", 9), Card("Clubs", "Five", 5)]
+    result = game.check_winner()
+    assert result == "Player wins! Dealer busted."
+
+# Verificar o comportamento do jogo em caso de empate
+def test_check_winner_tie():
+    game = BlackjackGame()
+    game.player_hand = [Card("Hearts", "Ten", 10), Card("Diamonds", "Nine", 9)]
+    game.dealer_hand = [Card("Clubs", "Ten", 10), Card("Spades", "Nine", 9)]
+    result = game.check_winner()
+    assert result == "It's a tie!"
