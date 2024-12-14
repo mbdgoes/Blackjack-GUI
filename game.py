@@ -41,15 +41,21 @@ class BlackjackGame:
         self.player_chips = 5000
         self.current_bet = 0
         self.game_over = False
+        self.stats = PlayerStats()
+        self.logger = GameLogger()
 
     def start_game(self):
         self.player_hand = [self.deck.draw_card(), self.deck.draw_card()]
         self.dealer_hand = [self.deck.draw_card(), self.deck.draw_card()]
         self.game_over = False
+        self.stats.new_session()
 
         if self.calculate_hand_value(self.dealer_hand) == 21:
             self.game_over = True
-            return "Dealer has Blackjack! You lose."
+            result = "Dealer has Blackjack! You lose."
+            self.logger.log_game(self.player_hand, self.dealer_hand, result)
+            self.stats.record_loss()
+            return result
 
     def calculate_hand_value(self, hand):
         value = sum(card.value for card in hand)
@@ -94,9 +100,75 @@ class BlackjackGame:
 
     def settle_bet(self, message):
         if "Player wins" in message:
+            self.stats.record_win()
             self.player_chips += self.current_bet * 2
         elif "It's a tie" in message:
+            self.stats.record_tie()
             self.player_chips += self.current_bet
+        else:
+            self.stats.record_loss()
+
+        self.logger.log_game(self.player_hand, self.dealer_hand, message)
 
     def get_player_chips(self):
         return self.player_chips
+    
+    def display_stats(self):
+        return self.stats.display_stats()
+
+    def save_logs(self):
+        self.logger.save_logs_to_file()
+
+class PlayerStats:
+    def __init__(self):
+        self.wins = 0
+        self.losses = 0
+        self.ties = 0
+        self.sessions_played = 0
+
+    def record_win(self):
+        self.wins += 1
+
+    def record_loss(self):
+        self.losses += 1
+
+    def record_tie(self):
+        self.ties += 1
+
+    def new_session(self):
+        self.sessions_played += 1
+
+    def display_stats(self):
+        return (f"Sessions Played: {self.sessions_played}\n"
+                f"Wins: {self.wins}\n"
+                f"Losses: {self.losses}\n"
+                f"Ties: {self.ties}")
+
+class GameLogger:
+    def __init__(self):
+        self.logs = []
+
+    def log_game(self, player_hand, dealer_hand, result):
+        log_entry = {
+            "player_hand": [str(card) for card in player_hand],
+            "dealer_hand": [str(card) for card in dealer_hand],
+            "result": result
+        }
+        self.logs.append(log_entry)
+
+    def save_logs_to_file(self, filename="game_logs.txt"):
+        with open(filename, "w") as file:
+            for i, log in enumerate(self.logs, 1):
+                file.write(f"Game {i}:\n")
+                file.write(f"Player Hand: {', '.join(log['player_hand'])}\n")
+                file.write(f"Dealer Hand: {', '.join(log['dealer_hand'])}\n")
+                file.write(f"Result: {log['result']}\n\n")
+
+    def clear_logs(self):
+        self.logs = []
+
+    def display_stats(self):
+        return self.stats.display_stats()
+
+    def save_logs(self):
+        self.logger.save_logs_to_file()

@@ -62,6 +62,14 @@ class BlackjackGUI:
         self.reset_button = tk.Button(self.button_frame, text="Reset", command=self.reset_game, width=10)
         self.reset_button.grid(row=0, column=2, padx=10)
 
+        # Display statistics
+        self.stats_button = tk.Button(self.frame, text="View Stats", command=self.show_stats, width=15)
+        self.stats_button.pack(pady=5)
+
+        # Save logs
+        self.save_logs_button = tk.Button(self.frame, text="Save Logs", command=self.save_logs, width=15)
+        self.save_logs_button.pack(pady=5)
+
         self.load_card_images()
         self.reset_game()
 
@@ -107,6 +115,7 @@ class BlackjackGUI:
     def reset_game(self):
         self.game.reset_chips()
         self.game = BlackjackGame()
+        self.game.logger.clear_logs()
         self.update_ui()
         self.enable_bet_buttons()
         self.disable_action_buttons()
@@ -165,6 +174,14 @@ class BlackjackGUI:
         self.hit_button.config(state="normal")
         self.stand_button.config(state="normal")
         self.reset_button.config(state="normal")
+
+    def show_stats(self):
+        stats = self.game.display_stats()
+        messagebox.showinfo("Player Statistics", stats)
+
+    def save_logs(self):
+        self.game.save_logs()
+        messagebox.showinfo("Logs Saved", "Game logs have been saved to 'game_logs.txt'.")
 
 
 if __name__ == "__main__":
