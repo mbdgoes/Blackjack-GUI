@@ -2,6 +2,8 @@ name: testing
 on:
   push:
     branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
 jobs:
   test-ubuntu:
@@ -18,10 +20,19 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pytest
+          pip install coverage
           pip install -r requirements.txt
-      - name: Run tests with xvfb
+      - name: Run tests with xvfb and collect coverage
         run: |
-          xvfb-run pytest
+          xvfb-run coverage run -m pytest
+      - name: Generate coverage report
+        run: |
+          coverage xml  # Generate XML report for Codecov
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: mbdgoes/Blackjack-GUI
 
   test-macos:
     runs-on: macos-latest
@@ -35,10 +46,19 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pytest
+          pip install coverage
           pip install -r requirements.txt
-      - name: Run tests with pytest
+      - name: Run tests and collect coverage
         run: |
-          pytest
+          coverage run -m pytest
+      - name: Generate coverage report
+        run: |
+          coverage xml  # Generate XML report for Codecov
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: mbdgoes/Blackjack-GUI
 
   test-windows:
     runs-on: windows-latest
@@ -52,7 +72,16 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pytest
+          pip install coverage
           pip install -r requirements.txt
-      - name: Run tests with pytest
+      - name: Run tests and collect coverage
         run: |
-          pytest
+          coverage run -m pytest
+      - name: Generate coverage report
+        run: |
+          coverage xml  # Generate XML report for Codecov
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: mbdgoes/Blackjack-GUI
