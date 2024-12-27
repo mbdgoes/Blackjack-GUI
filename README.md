@@ -1,5 +1,5 @@
 # Trabalho Prático - Teste de Software
-
+[![codecov](https://codecov.io/github/mbdgoes/Blackjack-GUI/graph/badge.svg?token=MXWZAYYYDE)](https://codecov.io/github/mbdgoes/Blackjack-GUI)
 ### Integrantes
 - Marcelo Lommez Rodrigues de Jesus
 - Mateus Brandão Damasceno Góes
