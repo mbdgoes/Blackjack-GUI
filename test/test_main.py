@@ -2,6 +2,7 @@ from unittest.mock import patch
 import tkinter as tk
 from main import main
 
+# Executa o main e verifica a execução das funções do loop principal
 def test_main_execution():
     with patch("main.tk.Tk") as mock_tk:
         mock_root = mock_tk.return_value

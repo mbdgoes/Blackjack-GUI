@@ -223,10 +223,3 @@ def test_multiple_game_sessions():
     stats.new_session()
     stats.new_session()
     assert stats.sessions_played == 2
-
-# Verifica se não pode haver aposta após o fim do jogo
-def test_place_bet_game_over():
-    game = BlackjackGame()
-    game.game_over = True
-    result = game.place_bet(500)
-    assert result == "Cannot place a bet; the game is over."

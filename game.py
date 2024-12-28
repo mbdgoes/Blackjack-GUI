@@ -91,8 +91,6 @@ class BlackjackGame:
         self.player_chips = 5000
 
     def place_bet(self, amount):
-        if self.game_over:
-            return "Cannot place a bet; the game is over."
         if amount <= 0 or amount > self.player_chips:
             return "Invalid bet amount."
         self.current_bet = amount
